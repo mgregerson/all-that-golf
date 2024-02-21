@@ -1,0 +1,162 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+model User {
+  id            Int           @id @default(autoincrement())
+  username      String        @unique
+  email         String        @unique
+  firstName     String?
+  lastName      String?
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+  photoUrl      String?
+  userPayments  UserPayment[]
+  userAddresses UserAddress[]
+  Orders        Order[]
+  TeeTimes      TeeTime[]
+}
+
+model UserAddress {
+  id              Int      @id @default(autoincrement())
+  userId          Int?
+  user            User?    @relation(fields: [userId], references: [id])
+  addressLine1    String
+  addressLine2    String?
+  city            String
+  state           String
+  country         String
+  zipCode         String
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  telephoneNumber String?
+}
+
+model UserPayment {
+  id         Int      @id @default(autoincrement())
+  userId     Int?
+  user       User?    @relation(fields: [userId], references: [id])
+  cardNumber String
+  cardType   String
+  cardExpiry String
+  cardCvv    String
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+}
+
+model Product {
+  id                Int      @id @default(autoincrement())
+  name              String
+  description       String
+  price             Float
+  SKU               String
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+  Price             Float
+  CategoryId        Int?
+  Category          ProductCategory? @relation(fields: [CategoryId], references: [id])
+  ProductInventory  ProductInventory?
+}
+
+model ProductCategory {
+  id          Int      @id @default(autoincrement())
+  name        String
+  description String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  Products    Product[]
+}
+
+model ProductInventory {
+  id          Int         @id @default(autoincrement())
+  productId   Int         @unique
+  product     Product?    @relation(fields: [productId], references: [id])
+  quantity    Int
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+}
+
+
+model Order {
+  id         Int            @id @default(autoincrement())
+  userId     Int?
+  user       User?          @relation(fields: [userId], references: [id])
+  TotalPrice Float
+  createdAt  DateTime       @default(now())
+  updatedAt  DateTime       @updatedAt
+  cartItems  OrderItem[]
+}
+
+model OrderItem {
+  id        Int         @id @default(autoincrement())
+  orderId   Int?
+  order     Order?      @relation(fields: [orderId], references: [id])
+  quantity  Int
+  createdAt DateTime    @default(now())
+  updatedAt DateTime    @updatedAt
+}
+
+model Discount {
+  id              Int         @id @default(autoincrement())
+  name            String
+  description     String
+  discountCode    String
+  discountPercent Float
+  createdAt       DateTime    @default(now())
+  updatedAt       DateTime    @updatedAt
+  active          Boolean
+}
+
+model GolfCourse {
+  id                  Int           @id @default(autoincrement())
+  name                String
+  description         String?
+  city                String
+  state               String
+  distanceInYards     Int
+  price               Float?
+  numHoles            Int
+  zipCode             Int
+  phoneNumber         String?
+  imageURL            String?
+  GolfHoles           GolfHole[]
+  TeeTimes            TeeTime[]
+  par                 Int
+  createdAt           DateTime      @default(now())
+  updatedAt           DateTime      @updatedAt
+}
+
+model GolfHole {
+  id                  Int           @id @default(autoincrement())
+  name                String? 
+  GolfCourse          GolfCourse?   @relation(fields: [golfCourseId], references: [id])
+  golfCourseId        Int?
+  description         String?
+  HoleNumber          Int
+  par                 Int
+  distanceInYards     Int
+  createdAt           DateTime      @default(now())
+  updatedAt           DateTime      @updatedAt
+}
+
+model TeeTime {
+  id                  Int           @id @default(autoincrement())
+  golfCourseId        Int?
+  golfCourse          GolfCourse?   @relation(fields: [golfCourseId], references: [id])
+  userId              Int?
+  user                User?         @relation(fields: [userId], references: [id])
+  teeTime             DateTime
+  createdAt           DateTime      @default(now())
+  updatedAt           DateTime      @updatedAt
+}
